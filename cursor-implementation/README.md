@@ -23,6 +23,10 @@ sudo update-ca-certificates
 
 bash my-app-name/.secret/environment_setup.sh
 
+cd my-app-name
+uv python install 3.14
+uv init
+
 exit
 # end of commands run inside the VM =================================== #
 
