@@ -7,7 +7,7 @@ declare -A install_cmds=(
 	[uv]='curl -LsSf https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env'
 )
 
-install_order=(curl tree cursoragent uv)
+install_order=(curl tree cursoragent cursoragentconfig uv)
 
 for name in "${install_order[@]}"; do
 	echo "installing $name"
