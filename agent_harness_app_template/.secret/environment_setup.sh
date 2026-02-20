@@ -4,7 +4,7 @@ declare -A install_cmds=(
 	[curl]="sudo apt install curl"
 	[tree]="sudo apt install tree"
 	[cursoragent]="curl https://cursor.com/install -fsS | bash"
-	[uv]='curl -LsSf https://astral.sh/uv/install.sh | sh && source $HOME/.local/bin/env'
+	[uv]='curl -LsSf https://astral.sh/uv/install.sh'
 )
 
 install_order=(curl tree cursoragent cursoragentconfig uv)
