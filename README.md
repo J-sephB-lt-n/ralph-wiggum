@@ -2,6 +2,8 @@
 
 This implementation currently supports cursor (the CLI agent) or opencode (your choice).
 
+Since the agents run in a VM (using lima-vm), they can basically do what they want without affecting your host system. However, be aware that we are not completely safe since they can still fetch from the web (e.g. using curl) and download malicious content.
+
 The template for the application directory which the agents will work in is [./agent_harness_app_template/](./agent_harness_app_template/) (a copy of this directory is made, and this directory is all that the agents can see).
 
 The application directory contains a `.secret/` folder, which all agents are instructed to ignore (in their prompts i.e. it is a soft instruction for context protection, not a guardrail).
@@ -29,7 +31,8 @@ limactl shell ralph
 sudo cp my-app-name/.secret/ca-certificates/* /usr/local/share/ca-certificates/ # only run if you copied in your CA certs earlier
 sudo update-ca-certificates
 
-bash my-app-name/.secret/environment_setup.sh # setup environment (install packages etc.)
+bash my-app-name/.secret/environment_setup.sh cursor # if you want cursor-agent CLI
+bash my-app-name/.secret/environment_setup.sh opencode # if you want opencode CLI
 source $HOME/.local/bin/env # make uv cli available without restarting the shell
 
 cd my-app-name
