@@ -12,7 +12,7 @@ declare -A install_cmds=(
 	[tree]="sudo apt install tree"
 	[cursoragent]="curl https://cursor.com/install -fsS | bash"
 	[opencodeagent]="curl -fsSL https://opencode.ai/install | bash"
-	[uv]='curl -LsSf https://astral.sh/uv/install.sh'
+	[uv]='curl -LsSf https://astral.sh/uv/install.sh | sh'
 )
 
 install_order=(curl tree uv)

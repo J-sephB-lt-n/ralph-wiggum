@@ -29,18 +29,21 @@ limactl shell ralph
 
 # start of commands run inside the VM ================================= #
 sudo cp my-app-name/.secret/ca-certificates/* /usr/local/share/ca-certificates/ # only run if you copied in your CA certs earlier
-sudo update-ca-certificates
+sudo update-ca-certificates # only run if you copied in your CA certs earlier
 
 bash my-app-name/.secret/environment_setup.sh cursor # if you want cursor-agent CLI
 bash my-app-name/.secret/environment_setup.sh opencode # if you want opencode CLI
-source $HOME/.local/bin/env # make uv cli available without restarting the shell
+source ~/.bashrc # to get uv and opencode CLI commands to register
 
 cd my-app-name
 tree -a   # see the folder layout
 sudo mv .secret/cursor/cli-config.json ~/.cursor  # if using cursor
+mkdir ~/.config/opencode
 sudo mv .secret/opencode/opencode.json ~/.config/opencode # if using opencode
 uv python install 3.14
 uv init
+export OPENAI_BASE_URL='...'
+export OPENAI_API_KEY='...'
 
 exit
 # end of commands run inside the VM =================================== #
