@@ -44,3 +44,7 @@ esac
 
 echo "MAX_N_LOOPS: $MAX_N_LOOPS"
 echo "AGENT_LIB:   $AGENT_LIB"
+
+for ((i = 1; i <= MAX_N_LOOPS; i++)); do
+	echo "STARTED LOOP $i"
+done
