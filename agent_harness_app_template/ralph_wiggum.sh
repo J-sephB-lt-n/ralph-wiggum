@@ -47,4 +47,9 @@ echo "AGENT_LIB:   $AGENT_LIB"
 
 for ((i = 1; i <= MAX_N_LOOPS; i++)); do
 	echo "STARTED LOOP $i"
+	if [[ "$AGENT_LIB" == "cursor" ]]; then
+		cursor-agent --version #cursor-agent -p "$PROMPT"
+	elif [[ "$AGENT_LIB" == "opencode" ]]; then
+		opencode --version #opencode run "$PROMPT"
+	fi
 done
