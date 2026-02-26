@@ -10,12 +10,13 @@ fi
 declare -A install_cmds=(
 	[curl]="sudo apt install curl"
 	[tree]="sudo apt install tree"
+	[jq]="sudo apt install jq"
 	[cursoragent]="curl https://cursor.com/install -fsS | bash"
 	[opencodeagent]="curl -fsSL https://opencode.ai/install | bash"
 	[uv]='curl -LsSf https://astral.sh/uv/install.sh | sh'
 )
 
-install_order=(curl tree uv)
+install_order=(curl tree jq uv)
 
 case "$AGENT_LIB" in
 cursor)
