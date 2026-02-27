@@ -94,7 +94,7 @@ run_agent() {
 
 has_remaining_work() {
 	local count
-	count=$(jq '[.[] | select(.status == "NOT_STARTED" or .status == "IN_PROGRESS")] | length' features_list.json)
+	count=$(jq '[.[] | select(.status == "NOT_STARTED" or .status == "IN_PROGRESS" or .status == "PENDING_REVIEW")] | length' features_list.json)
 	[[ "$count" -gt 0 ]]
 }
 
