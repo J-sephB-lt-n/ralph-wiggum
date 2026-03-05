@@ -26,10 +26,11 @@ All agents are instructed to update the project docs if their changes have cause
 
 ## 1. Plan Agent
 
-Identifies which feature to work on by reading `features_list.json` and sets `"current_feature"` to the chosen feature ID.
+Identifies which feature to work on by reading `features_list.json` and sets `"current_feature"` to the chosen feature ID. Feature selection follows this priority order:
 
-- **First attempt** (feature status is `NOT_STARTED`): Sets status to `IN_PROGRESS`. Writes a plan to `docs/features/plans/<feature_id>/plan-1.md`.
-- **Retry** (feature status is `REVIEW_FAILED`): Reads the latest code review (`docs/features/code_reviews/<feature_id>/review-<N>.md`). Writes a new plan version (`plan-<N>.md`). Leaves status as `REVIEW_FAILED`.
+1. **Crash recovery** (`IN_PROGRESS`): A previous loop was interrupted mid-run. The Plan agent resumes from the existing plan (does not re-plan from scratch unless the plan is missing or incomplete).
+2. **Retry** (`REVIEW_FAILED`): Reads the latest code review (`docs/features/code_reviews/<feature_id>/review-<N>.md`). Writes a new plan version (`plan-<N>.md`, where N = `attempt_count`). Leaves status as `REVIEW_FAILED`.
+3. **First attempt** (`NOT_STARTED`): Sets status to `IN_PROGRESS`. Writes a plan to `docs/features/plans/<feature_id>/plan-1.md`.
 
 ## 2. Test Agent
 
