@@ -91,20 +91,43 @@ The agent loop can terminate in one of four ways:
 
 ```mermaid
 flowchart TD
-    Start[ralph_wiggum.sh] --> CheckAllComplete{"All features\nCOMPLETE?"}
-    CheckAllComplete -->|Yes| ExitDone["EXIT (0)"]
-    CheckAllComplete -->|No| PlanAgent[1. PLAN Agent]
-    PlanAgent --> TestAgent[2. TEST Agent]
-    TestAgent --> CodeAgent[3. CODE Agent]
-    CodeAgent --> ReviewAgent[4. REVIEW Agent]
-    ReviewAgent -->|PASS| MarkComplete[Set status COMPLETE]
-    ReviewAgent -->|FAIL| MarkFailed["Set status REVIEW_FAILED\nIncrement attempt_count"]
-    MarkFailed --> CheckRetries{"attempt_count >\nMAX_RETRIES?"}
-    CheckRetries -->|Yes| EarlyExit["EXIT (1)"]
-    CheckRetries -->|No| CheckLoop
-    MarkComplete --> CheckLoop{"loop count >=\nMAX_N_LOOPS?"}
-    CheckLoop -->|Yes| ExitMaxLoops["EXIT (2)"]
-    CheckLoop -->|No| CheckAllComplete
+    Start([Start ralph_wiggum.sh]) --> CheckLoops{loop_count <br> < MAX_N_LOOPS?}
+
+    CheckLoops -- No --> ExitLoops([Exit 2: Max loops reached])
+    CheckLoops -- Yes --> CheckRetries{attempt_count <br> > MAX_RETRIES?}
+    CheckRetries -- Yes --> ExitRetries([Exit 1: Max retries exceeded])
+    CheckRetries -- No --> CheckComplete{All features <br> COMPLETE?}
+    CheckComplete -- Yes --> ExitDone([Exit 0: All features complete])
+    CheckComplete -- No --> Plan
+
+    Plan[1. Plan Agent] --> PlanBranch{Feature status?}
+    PlanBranch -- NOT_STARTED --> NewPlan["Write plan-1.md
+    Status = IN_PROGRESS"]
+    PlanBranch -- IN_PROGRESS --> Resume["Resume existing plan
+    (crash recovery)"]
+    PlanBranch -- REVIEW_FAILED --> Replan["Read latest review
+    Write plan-N.md"]
+
+    NewPlan --> Test
+    Resume --> Test
+    Replan --> Test
+
+    Test[2. Test-Writing Agent] --> Code["3. Code Agent
+    Status = PENDING_REVIEW"]
+    Code --> Review[4. Review Agent]
+
+    Review --> RunTests[Run full test suite]
+    RunTests --> TryApp[Run app and verify]
+    TryApp --> Result{Review <br> passed?}
+    Result -- Pass --> Pass["Status = COMPLETE
+    Write review-N.md"]
+    Result -- Fail --> Fail["Status = REVIEW_FAILED
+    attempt_count++
+    Write review-N.md"]
+
+    Pass --> IncLoop[loop_count++]
+    Fail --> IncLoop
+    IncLoop --> CheckLoops
 ```
 
 All termination checks (`all features COMPLETE`, `attempt_count > MAX_RETRIES`, `loop count >= MAX_N_LOOPS`) are deterministic - `ralph_wiggum.sh` parses `features_list.json` with `jq`.
