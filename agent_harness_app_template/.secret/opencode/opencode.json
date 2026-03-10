@@ -29,14 +29,42 @@
         "apiKey": "{env:OPENAI_API_KEY}"
       },
       "models": {
-        "bedrock.anthropic.claude-sonnet-4-5": {
-          "name": "Claude Sonnet 4.5"
+        "bedrock.anthropic.claude-sonnet-4-6": {
+          "name": "Claude Sonnet 4.6 Thinking",
+          "options": {
+            "thinking": {
+              "type": "enabled",
+              "budget_tokens": 12000
+            }
+          },
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "cost": {
+            "input": 3,
+            "output": 15
+          }
         },
-        "vertex_ai.gemini-3-pro-preview": {
-          "name": "Gemini 3 Pro"
+        "bedrock.anthropic.claude-opus-4-6": {
+          "name": "Claude Opus 4.6 Thinking",
+          "options": {
+            "thinking": {
+              "type": "enabled",
+              "budget_tokens": 12000
+            }
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          },
+          "cost": {
+            "input": 5.5,
+            "output": 27.5
+          }
         }
       }
     }
   },
-  "model": "gaiss/bedrock.anthropic.claude-sonnet-4-5"
+  "model": "gaiss/bedrock.anthropic.claude-sonnet-4-6"
 }
