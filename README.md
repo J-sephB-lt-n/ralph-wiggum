@@ -34,18 +34,27 @@ All agents commit their changes to git after completing their work.
 
 All agents follow the same basic pattern:
 
-1. Read all project documentation, shared agent context files and git logs.
+1. Read required context before starting:
+   - all project documentation (`README.md`, `docs/**/*`)
+   - shared agent context files (`features_list.json`, `dev_notes.md`)
+   - latest plan/review for the current feature (`docs/features/plans/<feature_id>/plan-<N>.md`, `docs/features/code_reviews/<feature_id>/review-<N>.md`)
+   - recent git log (not full history)
 2. `<agent-specific steps>`
 3. Update project documentation.
 4. Commit to git.
 
 ## 1. Plan Agent
 
-Identifies which feature to work on by reading `features_list.json` and sets `"current_feature"` to the chosen feature ID. Feature selection follows this priority order:
+Identifies which feature to work on by reading `features_list.json` and sets `"current_feature"` to the chosen feature ID.
 
-1. **Crash recovery** (feature_status=`IN_PROGRESS`): A previous loop was interrupted mid-run. The Plan agent resumes from the existing plan (does not re-plan from scratch unless the plan is missing or incomplete).
-2. **Retry** (feature_status=`REVIEW_FAILED`): Reads the latest code review (`docs/features/code_reviews/<feature_id>/review-<N>.md`). Writes a new plan version (`plan-<N>.md`, where N = `attempt_count`). Leaves status as `REVIEW_FAILED`.
-3. **First attempt** (feature_status=`NOT_STARTED`): Sets status to `IN_PROGRESS`. Writes a plan to `docs/features/plans/<feature_id>/plan-1.md`.
+Soft dependency gate (instruction-level, not script-enforced): the Plan agent is instructed not to start a new `NOT_STARTED` feature until all of that feature's `dependencies` are `COMPLETE`.
+
+Feature selection follows this priority order:
+
+1. **Crash recovery (first attempt)** (feature_status=`IN_PROGRESS`): A previous loop was interrupted mid-run. The Plan agent does not write a new plan unless the existing plan contains problems or is incomplete, and leaves the feature status as `IN_PROGRESS`.
+2. **Crash recovery (retry attempt)** (feature_status=`ADDRESSING_REVIEW_COMMENTS`): A previous loop was interrupted while implementing review fixes. The plan agent does not write a new plan unless the existing plan is problematic or incomplete, leaving the feature status as `ADDRESSING_REVIEW_COMMENTS`.
+3. **Retry kickoff** (feature_status=`REVIEW_FAILED`): Reads the latest code review (`docs/features/code_reviews/<feature_id>/review-<N>.md`). Writes a new plan version (`docs/features/plans/<feature_id>/plan-<N>.md`) and sets status to `ADDRESSING_REVIEW_COMMENTS`.
+4. **First attempt** (feature_status=`NOT_STARTED`): Sets status to `IN_PROGRESS`. Writes a plan to `docs/features/plans/<feature_id>/plan-1.md`.
 
 ## 2. Test-Writing Agent
 
@@ -74,7 +83,7 @@ Before reviewing, the Review agent:
 The review is written to `docs/features/code_reviews/<feature_id>/review-<N>.md` regardless of pass/fail.
 
 - **Pass**: Sets status to `COMPLETE`. Only the Review agent can mark a feature as `COMPLETE`.
-- **Fail**: Sets status to `REVIEW_FAILED` and increments `attempt_count` in `features_list.json`. The review document must be explicit about what must change to pass.
+- **Fail**: Sets status to `REVIEW_FAILED` and increments `failed_review_count` in `features_list.json` on the specific feature under review. The review document must be explicit about what must change to pass.
 
 ## Exit Conditions
 
@@ -84,7 +93,7 @@ The agent loop can terminate in one of four ways:
 
 1. All features are marked as `COMPLETE`
 2. Loop reaches MAX_N_LOOPS (all 4 agents is 1 loop).
-3. A single feature fails review more than MAX_RETRIES_PER_FEATURE times (early exit).
+3. A single feature reaches `failed_review_count >= MAX_RETRIES_PER_FEATURE` (early exit).
 4. The code crashes (out of memory, CLI agent program crashes, unforseen system error etc.)
 
 ## Flowchart
@@ -94,7 +103,7 @@ flowchart TD
     Start([Start ralph_wiggum.sh]) --> CheckLoops{loop_count <br> < MAX_N_LOOPS?}
 
     CheckLoops -- No --> ExitLoops([Exit 2: Max loops reached])
-    CheckLoops -- Yes --> CheckRetries{attempt_count <br> > MAX_RETRIES?}
+    CheckLoops -- Yes --> CheckRetries{current_feature.failed_review_count <br> >= MAX_RETRIES_PER_FEATURE?}
     CheckRetries -- Yes --> ExitRetries([Exit 1: Max retries exceeded])
     CheckRetries -- No --> CheckComplete{All features <br> COMPLETE?}
     CheckComplete -- Yes --> ExitDone([Exit 0: All features complete])
@@ -106,11 +115,15 @@ flowchart TD
     PlanBranch -- IN_PROGRESS --> Resume["Resume existing plan
     (crash recovery)"]
     PlanBranch -- REVIEW_FAILED --> Replan["Read latest review
-    Write plan-N.md"]
+    Write plan-N.md
+    Status = ADDRESSING_REVIEW_COMMENTS"]
+    PlanBranch -- ADDRESSING_REVIEW_COMMENTS --> ResumeRetry["Resume/adjust retry plan
+    (crash recovery)"]
 
     NewPlan --> Test
     Resume --> Test
     Replan --> Test
+    ResumeRetry --> Test
 
     Test[2. Test-Writing Agent] --> Code["3. Code Agent
     Status = PENDING_REVIEW"]
@@ -122,7 +135,7 @@ flowchart TD
     Result -- Pass --> Pass["Status = COMPLETE
     Write review-N.md"]
     Result -- Fail --> Fail["Status = REVIEW_FAILED
-    attempt_count++
+    failed_review_count++
     Write review-N.md"]
 
     Pass --> IncLoop[loop_count++]
@@ -130,7 +143,7 @@ flowchart TD
     IncLoop --> CheckLoops
 ```
 
-All termination checks (`all features COMPLETE`, `attempt_count > MAX_RETRIES`, `loop count >= MAX_N_LOOPS`) are deterministic - `ralph_wiggum.sh` parses `features_list.json` with `jq`.
+All termination checks (`all features COMPLETE`, `current_feature.failed_review_count >= MAX_RETRIES_PER_FEATURE`, `loop count >= MAX_N_LOOPS`) are deterministic - `ralph_wiggum.sh` parses `features_list.json` with `jq`.
 
 ## Shared Context Model
 
@@ -142,7 +155,7 @@ Agents share context exclusively through local files and git history:
 - **`docs/features/plans/<feature_id>/plan-<N>.md`** - versioned implementation plans.
 - **`docs/features/code_reviews/<feature_id>/review-<N>.md`** - code reviews.
 - **`dev_notes.md`** - optional append-only scratchpad for inter-agent notes (agents only write here if they have something genuinely useful to record, e.g. a design decision).
-- **`git log`** - commit history provides a timeline of all changes.
+- **`git log`** - recent commit history provides a timeline of recent changes.
 
 ## `features_list.json` Schema
 
@@ -157,7 +170,7 @@ Agents share context exclusively through local files and git history:
       "status": "NOT_STARTED",
       "last_updated_at": "2026-02-21T12:54:26+00:00",
       "dependencies": [],
-      "attempt_count": 1
+      "failed_review_count": 0
     }
   ],
   ...
@@ -170,10 +183,10 @@ Agents share context exclusively through local files and git history:
 | `id`              | Unique feature identifier (e.g. `F01`, `F02`)                                       |
 | `name`            | Short human-readable name                                                           |
 | `description`     | What the feature should do                                                          |
-| `status`          | One of: `NOT_STARTED`, `IN_PROGRESS`, `PENDING_REVIEW`, `REVIEW_FAILED`, `COMPLETE` |
+| `status`          | One of: `NOT_STARTED`, `IN_PROGRESS`, `PENDING_REVIEW`, `REVIEW_FAILED`, `ADDRESSING_REVIEW_COMMENTS`, `COMPLETE` |
 | `last_updated_at` | ISO 8601 timestamp of last status change                                            |
 | `dependencies`    | List of feature IDs this feature depends on (if any)                                |
-| `attempt_count`   | Number of attempts (starts at 1, incremented by Review agent on failure)            |
+| `failed_review_count` | Number of failed reviews for the feature (starts at 0, incremented by Review agent on failure) |
 
 ## Feature Status Flow
 
@@ -183,6 +196,7 @@ Agents share context exclusively through local files and git history:
 | `IN_PROGRESS`    | Being worked on (first attempt)                    | Plan agent    |
 | `PENDING_REVIEW` | Code complete, feature tests pass, awaiting review | Code agent    |
 | `REVIEW_FAILED`  | Review failed, will be retried in the next loop    | Review agent  |
+| `ADDRESSING_REVIEW_COMMENTS` | Implementing fixes from latest review comments | Plan agent |
 | `COMPLETE`       | Review passed                                      | Review agent  |
 
 # Running the Ralph Wiggum Loop
