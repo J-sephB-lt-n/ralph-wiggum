@@ -25,7 +25,7 @@ Read the following to understand the current state of the project:
 - `README.md`
 - `docs/**/*` (all project documentation)
 - `dev_notes.md`
-- Recent git log (`git log -10 --format='%H %s%n%b'`) - to understand recent changes
+- Recent git log (`git log -20 --format='%H %s%n%b'`) - to understand recent changes
 
 ### Step 2: Pick the feature to work on
 
@@ -49,7 +49,7 @@ If you are going to write a new plan, don't do it until step 4 (after you unders
 
 - **First attempt** (status was `NOT_STARTED`): No prior plan or review exists. Proceed to planning.
 - **Crash recovery - first attempt** (status was `IN_PROGRESS`): Read the existing plan at `docs/features/plans/<this-feature-id>/plan-1.md`.
-- **Crash recovery - retry** (status was `ADDRESSING_REVIEW_COMMENTS`): Read the existing latest plan at `docs/features/plans/<this-feature-id>/plan-<N>.md` (largest available N) and latest review at `docs/features/reviews/<this-feature-id>/review-<N>.md` (largest available N).
+- **Crash recovery - retry** (status was `ADDRESSING_REVIEW_COMMENTS`): Read the existing latest plan at `docs/features/plans/<this-feature-id>/plan-<N>.md` (largest available N) and latest review at `docs/features/code_reviews/<this-feature-id>/review-<N>.md` (largest available N).
 - **Crash recovery - pending review** (status was `PENDING_REVIEW`): No action required. Skip to Step 6.
 - **Retry kickoff** (status was `REVIEW_FAILED`): Read the latest code review at `docs/features/code_reviews/<feature_id>/review-<N>.md` (where N = `failed_review_count`). You must understand what went wrong and what must change before writing a new plan.
 
