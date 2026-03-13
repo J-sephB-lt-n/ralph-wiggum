@@ -253,13 +253,17 @@ source ~/.bashrc # to get uv and opencode CLI commands to register
 cd my-app-name
 tree -a   # see the folder layout
 git init
-sudo mv .secret/cursor/cli-config.json ~/.cursor  # if using cursor
+mkdir ~/.cursor # if using cursor
+mv .secret/cursor/cli-config.json ~/.cursor  # if using cursor
 mkdir ~/.config/opencode  # if using opencode
-sudo mv .secret/opencode/opencode.json ~/.config/opencode # if using opencode
+mv .secret/opencode/opencode.json ~/.config/opencode # if using opencode
 uv python install 3.14
 uv init
 export OPENAI_BASE_URL='...' # if using opencode
 export OPENAI_API_KEY='...' # if using opencode
+
+# if using cursor, need to run this then log in to cursor: #
+cursor-agent
 
 bash ralph_wiggum.sh \
   -l 20 \ # maximum number of agent loops (1 loop = 4 agents)
@@ -269,6 +273,10 @@ bash ralph_wiggum.sh \
 #   0 = all features complete
 #   1 = max review retries exceeded (early exit)
 #   2 = maximum agent loops reached
+
+# check token usage: #
+opencode stats # if using opencode
+# cursor doesn't expose token usage at this granularity (only in aggregate)
 
 exit
 # end of commands run inside the VM =================================== #

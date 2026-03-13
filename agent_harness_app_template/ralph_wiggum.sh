@@ -11,10 +11,10 @@
 
 set -euo pipefail
 
-AGENT_ROLES=("plan_agent" "test_agent" "code_agent" "review_agent")
+AGENT_ROLES=("plan_agent" "test_writer_agent" "code_agent" "review_agent")
 
 # ---------------------------------------------------------------------------
-# Argument parsing
+# CLI Argument parsing
 # ---------------------------------------------------------------------------
 
 MAX_N_LOOPS=""
@@ -72,8 +72,10 @@ echo ""
 # ---------------------------------------------------------------------------
 
 run_agent() {
-	local role="$1"
+	local iter_num="$1"
+	local role="$2"
 	local prompt_file=".secret/agent_prompts/${role}.md"
+	local log_file="agent_logs/loop_${iter_num}_${role}.log"
 
 	if [[ ! -f "$prompt_file" ]]; then
 		echo "ERROR: Prompt file not found: $prompt_file"
@@ -85,9 +87,9 @@ run_agent() {
 
 	echo "  Running $role ..."
 	if [[ "$AGENT_LIB" == "cursor" ]]; then
-		cursor-agent -p "$prompt"
+		cursor-agent --print --output-format stream-json --stream-partial-output --trust "$prompt" >"$log_file" 2>&1
 	elif [[ "$AGENT_LIB" == "opencode" ]]; then
-		opencode run "$prompt"
+		opencode run "$prompt" >"$log_file" 2>&1
 	fi
 	echo "  $role finished."
 }
@@ -140,7 +142,7 @@ for ((i = 1; i <= MAX_N_LOOPS; i++)); do
 	fi
 
 	for role in "${AGENT_ROLES[@]}"; do
-		run_agent "$role"
+		run_agent "$i" "$role"
 	done
 
 	echo ""
