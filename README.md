@@ -181,37 +181,46 @@ Agents share context exclusively through local files and git history:
 }
 ```
 
-| Field             | Description                                                                         |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| `current_feature` | ID of the feature currently being worked on                                         |
-| `id`              | Unique feature identifier (e.g. `F01`, `F02`)                                       |
-| `name`            | Short human-readable name                                                           |
-| `description`     | What the feature should do                                                          |
-| `status`          | One of: `NOT_STARTED`, `IN_PROGRESS`, `PENDING_REVIEW`, `REVIEW_FAILED`, `ADDRESSING_REVIEW_COMMENTS`, `COMPLETE` |
-| `last_updated_at` | ISO 8601 timestamp of last status change                                            |
-| `dependencies`    | List of feature IDs this feature depends on (if any)                                |
-| `failed_review_count` | Number of failed reviews for the feature (starts at 0, incremented by Review agent on failure) |
+| Field                 | Description                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `current_feature`     | ID of the feature currently being worked on                                                                       |
+| `id`                  | Unique feature identifier (e.g. `F01`, `F02`)                                                                     |
+| `name`                | Short human-readable name                                                                                         |
+| `description`         | What the feature should do                                                                                        |
+| `status`              | One of: `NOT_STARTED`, `IN_PROGRESS`, `PENDING_REVIEW`, `REVIEW_FAILED`, `ADDRESSING_REVIEW_COMMENTS`, `COMPLETE` |
+| `last_updated_at`     | ISO 8601 timestamp of last status change                                                                          |
+| `dependencies`        | List of feature IDs this feature depends on (if any)                                                              |
+| `failed_review_count` | Number of failed reviews for the feature (starts at 0, incremented by Review agent on failure)                    |
 
 ## Feature Status Flow
 
-| Status           | Meaning                                            | Set by        |
-| ---------------- | -------------------------------------------------- | ------------- |
-| `NOT_STARTED`    | Queued for work                                    | Initial state |
-| `IN_PROGRESS`    | Being worked on (first attempt)                    | Plan agent    |
-| `PENDING_REVIEW` | Code complete, feature tests pass, awaiting review | Code agent    |
-| `REVIEW_FAILED`  | Review failed, will be retried in the next loop    | Review agent  |
-| `ADDRESSING_REVIEW_COMMENTS` | Implementing fixes from latest review comments | Plan agent |
-| `COMPLETE`       | Review passed                                      | Review agent  |
+| Status                       | Meaning                                            | Set by        |
+| ---------------------------- | -------------------------------------------------- | ------------- |
+| `NOT_STARTED`                | Queued for work                                    | Initial state |
+| `IN_PROGRESS`                | Being worked on (first attempt)                    | Plan agent    |
+| `PENDING_REVIEW`             | Code complete, feature tests pass, awaiting review | Code agent    |
+| `REVIEW_FAILED`              | Review failed, will be retried in the next loop    | Review agent  |
+| `ADDRESSING_REVIEW_COMMENTS` | Implementing fixes from latest review comments     | Plan agent    |
+| `COMPLETE`                   | Review passed                                      | Review agent  |
 
 # Running the Ralph Wiggum Loop
 
-Prior to starting the agent loop, prepare the following documentation:
+First, copy the project template into your own location:
+
+```bash
+cd ralph-wiggum/
+cp -r agent_harness_app_template my-app-name
+```
+
+This is now your project codebase (the VM doesn't allow your coding agents to see anything else).
+
+Now, add the following documentation to your project:
 
 1. **`README.md`** - project overview.
 2. **`features_list.json`** - ordered list of discrete features to implement.
 3. (optional) **`docs/PRD.md`** - Product Requirements Document defining what to build and why.
 4. (optional) **`docs/architecture_design.md`** - Architecture Design Document defining **how** to build the application (architecture characteristics etc.).
-5. (optional) Any other application documentation you like in `docs/` (all agents are instructed to read everything in `/docs/` before starting their task).
+5. (optional) Any other application documentation you like in `docs/` (every agents is instructed to read everything in `/docs/` before starting their task).
 
 I highly recommend that you scaffold the folder layout (architecture) of your application, and document what each folder/file is for (and your architectural goals/patterns) in `README.md` (and/or `docs/architecture_design.md`) prior to starting the agent loop. Your coding agents are strongly instructed to adhere to your documentation, and a clearly defined (and documented) starting codebase architecture will hold back the floodgates of AI spaghetti code.
 You may even wish to go so far as to fill in the module docstrings, and add stub functions, classes and methods etc. (i.e. define all of the interfaces prior to starting the agent loop).
@@ -223,10 +232,6 @@ Then, start the agent loop using the following commands:
 # create the VM #
 limactl create --name ralph --vm-type=qemu --containerd=system # default is ubuntu
 limactl ls
-
-cd ralph-wiggum/
-# copy the application template to location where the app will be developed #
-cp -r agent_harness_app_template my-app-name
 
 # optional: if you need your CA certificates in the VM ==================== #
 mkdir my-app-name/.secret/ca-certificates

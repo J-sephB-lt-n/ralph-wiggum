@@ -8,9 +8,9 @@ if [ -z "$AGENT_LIB" ]; then
 fi
 
 declare -A install_cmds=(
-	[curl]="sudo apt install curl"
-	[tree]="sudo apt install tree"
-	[jq]="sudo apt install jq"
+	[curl]="sudo apt install -y curl"
+	[tree]="sudo apt install -y tree"
+	[jq]="sudo apt install -y jq"
 	[cursoragent]="curl https://cursor.com/install -fsS | bash"
 	[opencodeagent]="curl -fsSL https://opencode.ai/install | bash"
 	[uv]='curl -LsSf https://astral.sh/uv/install.sh | sh'
