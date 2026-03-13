@@ -95,7 +95,7 @@ The agent loop can terminate in one of four ways:
 1. All features are marked as `COMPLETE`
 2. Loop reaches MAX_N_LOOPS (all 4 agents is 1 loop).
 3. A single feature reaches `failed_review_count >= MAX_RETRIES_PER_FEATURE` (early exit).
-4. The code crashes (out of memory, CLI agent program crashes, unforseen system error etc.)
+4. The code crashes (out of memory, CLI agent program crashes, any step returns non-zero exit code, unforseen system error etc.)
 
 ## Flowchart
 
@@ -225,7 +225,9 @@ Now, add the following documentation to your project:
 I highly recommend that you scaffold the folder layout (architecture) of your application, and document what each folder/file is for (and your architectural goals/patterns) in `README.md` (and/or `docs/architecture_design.md`) prior to starting the agent loop. Your coding agents are strongly instructed to adhere to your documentation, and a clearly defined (and documented) starting codebase architecture will hold back the floodgates of AI spaghetti code.
 You may even wish to go so far as to fill in the module docstrings, and add stub functions, classes and methods etc. (i.e. define all of the interfaces prior to starting the agent loop).
 
-Then, start the agent loop using the following commands:
+While the loop is running, you can check progress of the main loop using `tail -f ralph_log.txt` or a specific agent log using `tail -f agent_logs/<filename>`. 
+
+Start the agent loop using the following commands:
 (These steps assume that lima-vm is already installed)
 
 ```bash
@@ -266,9 +268,14 @@ export OPENAI_API_KEY='...' # if using opencode
 cursor-agent
 
 bash ralph_wiggum.sh \
-  -l 20 \ # maximum number of agent loops (1 loop = 4 agents)
-  -r 3 \ # if a code review for the same feature fails more than this many times, this whole thing early exits
-  -a cursor # one of ['cursor', 'opencode']
+  # -l is maximum number of agent loops (1 loop = 4 agents)
+  -l 20 \ 
+  # -r is 'if a code review for the same feature fails more than this many times, this whole thing early exits'
+  -r 3 \
+  # -a is agent library - one of ['cursor', 'opencode']
+  -a cursor \
+  > ralph_log.txt
+
 # exit codes of ralph_wiggum.sh:
 #   0 = all features complete
 #   1 = max review retries exceeded (early exit)

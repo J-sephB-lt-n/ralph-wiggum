@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Four-phase agent loop: PLAN -> TEST -> CODE -> REVIEW
+# Four-phase agent loop: PLAN -> WRITE TESTS -> CODE -> REVIEW
 #
 # Usage:
 #   bash ralph_wiggum.sh -l 20 -r 3 -a opencode
@@ -87,33 +87,23 @@ run_agent() {
 
 	echo "  Running $role ..."
 	if [[ "$AGENT_LIB" == "cursor" ]]; then
-		cursor-agent --print --output-format stream-json --stream-partial-output --trust "$prompt" >"$log_file" 2>&1
+		cursor-agent --print --output-format stream-json --stream-partial-output --trust "$prompt" > "$log_file" 2>&1
 	elif [[ "$AGENT_LIB" == "opencode" ]]; then
-		opencode run "$prompt" >"$log_file" 2>&1
+		opencode run "$prompt" > "$log_file" 2>&1
 	fi
 	echo "  $role finished."
 }
 
-has_remaining_work() {
-	local count
-	count=$(jq '[.[] | select(.status == "NOT_STARTED" or .status == "IN_PROGRESS" or .status == "PENDING_REVIEW")] | length' features_list.json)
-	[[ "$count" -gt 0 ]]
-}
-
 all_features_complete() {
 	local incomplete
-	incomplete=$(jq '[.[] | select(.status != "COMPLETE")] | length' features_list.json)
+	incomplete=$(jq '[.all_features[] | select(.status != "COMPLETE")] | length' features_list.json)
 	[[ "$incomplete" -eq 0 ]]
 }
 
 max_retries_exceeded() {
 	local exceeded
-	exceeded=$(jq --argjson max "$MAX_RETRIES_PER_FEATURE" '
-		[.[] | select(.id | test("-review-[0-9]+$"))]
-		| group_by(.id | split("-review-") | .[0])
-		| map(length)
-		| any(. >= $max)
-	' features_list.json)
+	exceeded=$(jq --argjson max "$MAX_RETRIES_PER_FEATURE" \
+		'.all_features | any(.failed_review_count >= $max)' features_list.json)
 	[[ "$exceeded" == "true" ]]
 }
 
@@ -126,19 +116,14 @@ for ((i = 1; i <= MAX_N_LOOPS; i++)); do
 	echo "LOOP ITERATION $i / $MAX_N_LOOPS"
 	echo "========================================="
 
-	if ! has_remaining_work; then
-		if all_features_complete; then
-			echo "All features are COMPLETE. Exiting successfully."
-			exit 0
-		else
-			echo "No remaining work, but not all features are COMPLETE (some are REVIEW_FAILED with no pending fixes)."
-			exit 1
-		fi
-	fi
-
 	if max_retries_exceeded; then
 		echo "Max retries ($MAX_RETRIES_PER_FEATURE) exceeded for a feature. Early exit."
 		exit 1
+	fi
+
+	if all_features_complete; then
+		echo "All features are COMPLETE. Exiting successfully."
+		exit 0
 	fi
 
 	for role in "${AGENT_ROLES[@]}"; do
