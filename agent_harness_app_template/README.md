@@ -4,10 +4,11 @@ Application description here.
 
 # Feature Status Reference
 
-| Feature Status | Meaning                                                                                                        |
-| -------------- | -------------------------------------------------------------------------------------------------------------- |
-| NOT_STARTED    | No work done on this feature yet                                                                               |
-| IN_PROGRESS    | Feature is currently being worked on                                                                           |
-| PENDING_REVIEW | Feature code is completed, but has not passed code review yet                                                  |
-| COMPLETE       | Feature code is completed and has passed code review                                                           |
-| REVIEW_FAILED  | Feature code was completed but has failed code reivew (a fix feature `F<feature-num>-<review-num>` is created) |
+| Status                       | Meaning                                            | Set by        |
+| ---------------------------- | -------------------------------------------------- | ------------- |
+| `NOT_STARTED`                | Queued for work                                    | Initial state |
+| `IN_PROGRESS`                | Being worked on (first attempt)                    | Plan agent    |
+| `PENDING_REVIEW`             | Code complete, feature tests pass, awaiting review | Code agent    |
+| `REVIEW_FAILED`              | Review failed, will be retried in the next loop    | Review agent  |
+| `ADDRESSING_REVIEW_COMMENTS` | Implementing fixes from latest review comments     | Plan agent    |
+| `COMPLETE`                   | Review passed                                      | Review agent  |
