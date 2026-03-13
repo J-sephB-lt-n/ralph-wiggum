@@ -51,10 +51,11 @@ Soft dependency gate (instruction-level, not script-enforced): the Plan agent is
 
 Feature selection follows this priority order:
 
-1. **Crash recovery (first attempt)** (feature_status=`IN_PROGRESS`): A previous loop was interrupted mid-run. The Plan agent does not write a new plan unless the existing plan contains problems or is incomplete, and leaves the feature status as `IN_PROGRESS`.
-2. **Crash recovery (retry attempt)** (feature_status=`ADDRESSING_REVIEW_COMMENTS`): A previous loop was interrupted while implementing review fixes. The plan agent does not write a new plan unless the existing plan is problematic or incomplete, leaving the feature status as `ADDRESSING_REVIEW_COMMENTS`.
-3. **Retry kickoff** (feature_status=`REVIEW_FAILED`): Reads the latest code review (`docs/features/code_reviews/<feature_id>/review-<N>.md`). Writes a new plan version (`docs/features/plans/<feature_id>/plan-<N>.md`) and sets status to `ADDRESSING_REVIEW_COMMENTS`.
-4. **First attempt** (feature_status=`NOT_STARTED`): Sets status to `IN_PROGRESS`. Writes a plan to `docs/features/plans/<feature_id>/plan-1.md`.
+1. **Crash recovery (pending review)** (feature_status=`PENDING_REVIEW`): A previous loop was interrupted after code was complete but before the review finished. The Plan agent does not write a new plan and leaves the feature status as `PENDING_REVIEW`.
+2. **Crash recovery (first attempt)** (feature_status=`IN_PROGRESS`): A previous loop was interrupted mid-run. The Plan agent does not write a new plan unless the existing plan contains problems or is incomplete, and leaves the feature status as `IN_PROGRESS`.
+3. **Crash recovery (retry attempt)** (feature_status=`ADDRESSING_REVIEW_COMMENTS`): A previous loop was interrupted while implementing review fixes. The plan agent does not write a new plan unless the existing plan is problematic or incomplete, leaving the feature status as `ADDRESSING_REVIEW_COMMENTS`.
+4. **Retry kickoff** (feature_status=`REVIEW_FAILED`): Reads the latest code review (`docs/features/code_reviews/<feature_id>/review-<N>.md`). Writes a new plan version (`docs/features/plans/<feature_id>/plan-<N>.md`) and sets status to `ADDRESSING_REVIEW_COMMENTS`.
+5. **First attempt** (feature_status=`NOT_STARTED`): Sets status to `IN_PROGRESS`. Writes a plan to `docs/features/plans/<feature_id>/plan-1.md`.
 
 ## 2. Test-Writing Agent
 
@@ -110,6 +111,8 @@ flowchart TD
     CheckComplete -- No --> Plan
 
     Plan[1. Plan Agent] --> PlanBranch{Feature status?}
+    PlanBranch -- PENDING_REVIEW --> SkipToReview["No new plan
+    (crash recovery)"]
     PlanBranch -- NOT_STARTED --> NewPlan["Write plan-1.md
     Status = IN_PROGRESS"]
     PlanBranch -- IN_PROGRESS --> Resume["Resume existing plan
@@ -120,6 +123,7 @@ flowchart TD
     PlanBranch -- ADDRESSING_REVIEW_COMMENTS --> ResumeRetry["Resume/adjust retry plan
     (crash recovery)"]
 
+    SkipToReview --> Test
     NewPlan --> Test
     Resume --> Test
     Replan --> Test
