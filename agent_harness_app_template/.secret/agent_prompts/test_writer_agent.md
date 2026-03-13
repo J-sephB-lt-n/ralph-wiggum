@@ -33,6 +33,8 @@ Read `features_list.json` and find the feature matching the `"current_feature"` 
 
 Do NOT change which feature is being worked on - the Plan agent already selected it.
 
+Do NOT modify `features_list.json` at all. Each status transition is owned by a specific agent (Plan, Code, or Review) and the test-writer does not own any. Modifying statuses here would corrupt the pipeline's state machine.
+
 ### Step 3: Read the plan and (if retry) the latest review
 
 Read the latest plan at:
@@ -45,7 +47,7 @@ where `<feature_id>` is the current feature (indicated by `"current_feature"` in
 
 You will encounter exactly one of the following situations:
 
-- **Crash recovery (pending review)** (status is `PENDING_REVIEW`): The feature code is already complete and awaiting review, but the review agent crashed before finishing the review stage. Do NOT write any new tests. Skip directly to Step 7 (commit).
+- **Crash recovery (pending review)** (status is `PENDING_REVIEW`): The feature code is already complete and awaiting review, but the review agent crashed before finishing the review stage. Do NOT write any new tests. Skip directly to Step 8 (commit).
 - **First attempt** (status is `IN_PROGRESS`): Read the plan only. The plan's "Tests to write" section is your primary specification for what tests to create.
 - **Retry** (status is `ADDRESSING_REVIEW_COMMENTS`): Read BOTH the latest plan (`docs/features/plans/<current-feature-id>/plan-<N>.md` for `max(N)`) AND the latest code review (`docs/features/code_reviews/<feature_id>/review-<N>.md` for `max(N)`). The review may identify missing test coverage, incorrect test expectations, or other test-related issues. The plan takes precedence as your primary guide, but the review provides critical context on what went wrong previously.
 
@@ -85,7 +87,16 @@ Run the test suite to confirm your new tests are syntactically valid and are bei
 
 If your tests have syntax errors or import errors (other than expected import errors for modules which don't yet exist), fix them now. If pre-existing tests broke, revert your changes to those tests immediately.
 
-### Step 7: Communicate and commit
+### Step 7: Update documentation
+
+If your changes have caused any project documentation to diverge from the codebase, update the documentation now. This includes:
+
+- `README.md` (e.g. new instructions for running the test suite)
+- `docs/**/*` (e.g. testing conventions, new test utilities)
+
+Do NOT update plan files or review files - those are owned by the Plan and Review agents respectively.
+
+### Step 8: Communicate and commit
 
 If you have anything to communicate which will assist future agents working on the codebase, and which you have not already documented elsewhere, then append it to `dev_notes.md`. Don't add to this file for the sake of it - only if you have something useful to add (e.g. a testing decision, a note about test fixtures the Code agent should be aware of).
 
