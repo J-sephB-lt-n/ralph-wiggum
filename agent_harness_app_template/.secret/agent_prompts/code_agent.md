@@ -62,8 +62,13 @@ Guidelines:
 Run the full test suite. If any tests for this feature fail:
 
 1. Read the failing test(s) to understand what behaviour is expected.
-2. Fix your implementation (not the tests - you are NOT allowed to modify or delete tests).
-3. Re-run the test suite.
+2. Fix your implementation first.
+3. If, and only if, a failing test is genuinely incorrect (it contradicts the feature description, plan, project documentation, or objectively tests invalid behaviour, or there is some other genuine problem with it), you may modify that test with extreme care.
+   - You must prefer fixing implementation over changing tests.
+   - You must keep test changes minimal and directly tied to the identified test defect.
+   - You must not use this as a shortcut to make implementation pass.
+   - You must record every such test change and justification in `dev_notes.md` (append-only), including why the original test was wrong and why the new expectation is correct.
+4. Re-run the test suite.
 
 Repeat this cycle until all tests pass. Do not move on until the full test suite is green (both the tests for this feature and any pre-existing tests).
 

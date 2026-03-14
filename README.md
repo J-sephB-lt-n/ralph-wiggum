@@ -273,7 +273,7 @@ bash ralph_wiggum.sh \
   # -r is 'if a code review for the same feature fails more than this many times, this whole thing early exits'
   -r 3 \
   # -a is agent library - one of ['cursor', 'opencode']
-  -a cursor \
+  -a opencode \
   > ralph_log.txt
 
 # exit codes of ralph_wiggum.sh:

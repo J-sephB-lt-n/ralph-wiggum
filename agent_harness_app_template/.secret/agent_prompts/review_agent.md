@@ -78,6 +78,13 @@ After verification, stop the application.
 
 Assess the code changes for the current feature against the following checklist. Examine every file that was created or modified for this feature (use the plan's "Files to create or modify" section and the git log to identify them, then read those files).
 
+If the Code agent modified any test files in this iteration, you must apply strict test-change review in addition to the checklist:
+
+- Confirm each modified test was genuinely incorrect before modification (contradicted feature description, plan, project documentation, or tested invalid behaviour, or there was something genuinely wrong with the test).
+- Confirm the test change is minimal and does not broaden/narrow scope beyond the documented requirement.
+- Confirm `dev_notes.md` contains explicit justification for each modified test, and this justification is strong and valid.
+- If any of the above is missing or weakly justified, record at least a **High** severity finding and fail the review.
+
 For each check, assign a severity if the check fails:
 
 - **Critical**: The code is broken, produces incorrect results, or violates a fundamental project requirement. Automatic review failure.
@@ -109,6 +116,8 @@ For each check, assign a severity if the check fails:
 10. **Dead code**: Is there any code that was introduced or left behind which is no longer accessed or used? This includes unused imports, unreachable code paths, commented-out code blocks, unused functions/classes/variables, and orphaned test utilities.
 
 11. **Any other aspect**: Review any other aspects which you think are important for the quality and correctness of this specific feature. Use your judgement - the above checklist is not exhaustive. If you identify an issue that doesn't fit neatly into any of the above categories, still record it with an appropriate severity.
+
+12. **Test modifications (strict)**: If any tests were modified by the Code agent, verify each change is necessary, minimal, specification-aligned, and explicitly justified in `dev_notes.md`. Treat unjustified or overly broad test edits as **High** severity (or **Critical** if they mask broken functionality).
 
 ### Step 7: Subsequent review - targeted assessment
 

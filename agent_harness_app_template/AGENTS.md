@@ -46,29 +46,12 @@
   - No magic numbers (use named constants instead).
 - In any other places where documentation is optional (e.g the "description" argument in `pydantic.Field` on attributes in a `pydantic.BaseModel`, the "help" argument in `argparse.ArgumentParser().add_argument()`, always provide useful documentation).
 
-# Software Testing
-
-- I don't believe in 100% test coverage, but please identify parts of the code which would be made more robust by adding tests and raise these with me.
-- The test suite is going to consist of hundreds of tests, so ensure that no individual unit test takes more than 1 second to run.
-- You are never allowed to delete or modify existing tests. If you have a compelling reason to do so, ask me directly for permission first.
-
 # Error Handling
 
 - Exceptions are an important signal and should not be thoughtlessly suppressed.
 - Unexpected program behaviour must raise an exception (don't try to catch developer mistakes with error-handling code).
 - A bare try/except may only be used at the topmost end-user-facing level of the application (if at all). All other exceptions must bubble up.
 - Always log the full stack trace (e.g. use _logger.exception()_ rather than _logger.error()_)
-
-# User Inputs
-
-- User inputs should always be assumed to be malicious.
-
-# Red Flags
-
-- ALWAYS ask permission before using any of the following functions/keywords:
-  - exec
-  - eval
-  - global
 
 # Environment Variables
 
