@@ -209,7 +209,7 @@ First, copy the project template into your own location:
 
 ```bash
 cd ralph-wiggum/
-cp -r agent_harness_app_template my-app-name
+cp -r agent_harness_app_template my-app-name # put it where you want your new codebase
 ```
 
 This is now your project codebase (the VM doesn't allow your coding agents to see anything else).
@@ -225,7 +225,7 @@ Now, add the following documentation to your project:
 I highly recommend that you scaffold the folder layout (architecture) of your application, and document what each folder/file is for (and your architectural goals/patterns) in `README.md` (and/or `docs/architecture_design.md`) prior to starting the agent loop. Your coding agents are strongly instructed to adhere to your documentation, and a clearly defined (and documented) starting codebase architecture will hold back the floodgates of AI spaghetti code.
 You may even wish to go so far as to fill in the module docstrings, and add stub functions, classes and methods etc. (i.e. define all of the interfaces prior to starting the agent loop).
 
-While the loop is running, you can check progress of the main loop using `tail -f ralph_log.txt` or a specific agent log using `tail -f agent_logs/<filename>`. 
+While the loop is running, you can check progress of the main loop using `tail -f ralph_log.txt` or a specific agent log using `tail -f agent_logs/<filename>`.
 
 Start the agent loop using the following commands:
 (These steps assume that lima-vm is already installed)
@@ -269,7 +269,7 @@ cursor-agent
 
 bash ralph_wiggum.sh \
   # -l is maximum number of agent loops (1 loop = 4 agents)
-  -l 20 \ 
+  -l 20 \
   # -r is 'if a code review for the same feature fails more than this many times, this whole thing early exits'
   -r 3 \
   # -a is agent library - one of ['cursor', 'opencode']
