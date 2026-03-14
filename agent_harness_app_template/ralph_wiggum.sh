@@ -87,9 +87,9 @@ run_agent() {
 
 	echo "  Running $role ..."
 	if [[ "$AGENT_LIB" == "cursor" ]]; then
-		cursor-agent --print --output-format stream-json --stream-partial-output --trust "$prompt" > "$log_file" 2>&1
+		cursor-agent --print --output-format stream-json --stream-partial-output --trust "$prompt" >"$log_file" 2>&1
 	elif [[ "$AGENT_LIB" == "opencode" ]]; then
-		opencode run "$prompt" > "$log_file" 2>&1
+		opencode run "$prompt" >"$log_file" 2>&1
 	fi
 	echo "  $role finished."
 }
@@ -116,14 +116,14 @@ for ((i = 1; i <= MAX_N_LOOPS; i++)); do
 	echo "LOOP ITERATION $i / $MAX_N_LOOPS"
 	echo "========================================="
 
-	if max_retries_exceeded; then
-		echo "Max retries ($MAX_RETRIES_PER_FEATURE) exceeded for a feature. Early exit."
-		exit 1
-	fi
-
 	if all_features_complete; then
 		echo "All features are COMPLETE. Exiting successfully."
 		exit 0
+	fi
+
+	if max_retries_exceeded; then
+		echo "Max retries ($MAX_RETRIES_PER_FEATURE) exceeded for a feature. Early exit."
+		exit 1
 	fi
 
 	for role in "${AGENT_ROLES[@]}"; do
