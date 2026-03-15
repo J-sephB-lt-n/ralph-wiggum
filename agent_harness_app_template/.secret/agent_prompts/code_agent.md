@@ -63,7 +63,7 @@ Run the full test suite. If any tests for this feature fail:
 
 1. Read the failing test(s) to understand what behaviour is expected.
 2. Fix your implementation first.
-3. If, and only if, a failing test is genuinely incorrect (it contradicts the feature description, plan, project documentation, or objectively tests invalid behaviour, or there is some other genuine problem with it), you may modify that test with extreme care.
+3. If, and only if, a failing test is genuinely incorrect (it contradicts the feature description, plan, project documentation, or objectively tests invalid behaviour, or there is some other genuine problem with it), or you need to make a stylistic change to the test code (such as fixing type annotations or modifying formatting or documentation) you may modify that test with extreme care.
    - You must prefer fixing implementation over changing tests.
    - You must keep test changes minimal and directly tied to the identified test defect.
    - You must not use this as a shortcut to make implementation pass.

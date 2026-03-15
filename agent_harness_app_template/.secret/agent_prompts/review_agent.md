@@ -117,7 +117,7 @@ For each check, assign a severity if the check fails:
 
 11. **Any other aspect**: Review any other aspects which you think are important for the quality and correctness of this specific feature. Use your judgement - the above checklist is not exhaustive. If you identify an issue that doesn't fit neatly into any of the above categories, still record it with an appropriate severity.
 
-12. **Test modifications (strict)**: If any tests were modified by the Code agent, verify each change is necessary, minimal, specification-aligned, and explicitly justified in `dev_notes.md`. Treat unjustified or overly broad test edits as **High** severity (or **Critical** if they mask broken functionality).
+12. **Test modifications (strict)**: If any tests were modified by the Code agent, verify each change is necessary, minimal, specification-aligned, and explicitly justified in `dev_notes.md`. Treat unjustified or overly broad test edits as **High** severity (or **Critical** if they mask broken functionality). Stylistic changes to existing test code which do not change test behaviour (nor make the tests more lenient in any way) are also allowed (e.g. fixing type annotations, formatting or documentation).
 
 ### Step 7: Subsequent review - targeted assessment
 
